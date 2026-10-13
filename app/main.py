@@ -1,11 +1,16 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from app.model_service import GasModelService
 from app.serial_reader import SerialReader
 
 
+# ---------------------------------------------------------
+# SERVICES
+# ---------------------------------------------------------
 model_service = GasModelService("gas_model.pkl")
 
 serial_reader = SerialReader(
@@ -14,6 +19,9 @@ serial_reader = SerialReader(
 )
 
 
+# ---------------------------------------------------------
+# APP LIFESPAN
+# ---------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
@@ -24,6 +32,9 @@ async def lifespan(app: FastAPI):
     serial_reader.disconnect()
 
 
+# ---------------------------------------------------------
+# FASTAPI APP
+# ---------------------------------------------------------
 app = FastAPI(
     title="Smart Gas AI Monitoring API",
     version="1.0.0",
@@ -31,14 +42,35 @@ app = FastAPI(
 )
 
 
+# ---------------------------------------------------------
+# STATIC FILES AND TEMPLATES
+# ---------------------------------------------------------
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static"
+)
+
+templates = Jinja2Templates(
+    directory="templates"
+)
+
+
+# ---------------------------------------------------------
+# FRONTEND DASHBOARD
+# ---------------------------------------------------------
 @app.get("/")
-def root():
-    return {
-        "project": "Smart Gas AI Monitoring System",
-        "api": "running"
-    }
+def dashboard(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html"
+    )
 
 
+# ---------------------------------------------------------
+# HEALTH CHECK
+# ---------------------------------------------------------
 @app.get("/api/health")
 def health():
 
@@ -50,6 +82,9 @@ def health():
     }
 
 
+# ---------------------------------------------------------
+# LIVE SENSOR + ML STATUS
+# ---------------------------------------------------------
 @app.get("/api/status")
 def status():
 
@@ -71,10 +106,11 @@ def status():
     )
 
     return {
-        "connected": True,
+        "connected": serial_reader.running,
         "sensor": sensor_data,
         "ml": ml,
         "agreement": (
-            sensor_data["esp32_state"] == ml["status"]
+            sensor_data["esp32_state"]
+            == ml["status"]
         ),
     }

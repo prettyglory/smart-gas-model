@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Gas AI Monitor</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+    <header>
+        <div>
+            <h1>Smart Gas AI Monitor</h1>
+            <p>ESP32 + Machine Learning Safety System</p>
+        </div>
+
+        <div id="connectionBadge" class="badge offline">
+            ESP32 Offline
+        </div>
+    </header>
+
+
+    <section id="alertBanner" class="alert safe">
+        <div class="alert-icon">✓</div>
+
+        <div>
+            <span>System Status</span>
+            <h2 id="mainStatus">Waiting for sensor data</h2>
+        </div>
+    </section>
+
+
+    <section class="sensor-grid">
+
+        <div class="card">
+            <span>MQ-2 Raw</span>
+            <h2 id="rawValue">--</h2>
+            <small>Current gas sensor reading</small>
+        </div>
+
+        <div class="card">
+            <span>Baseline</span>
+            <h2 id="baselineValue">--</h2>
+            <small>Adaptive clean-air reference</small>
+        </div>
+
+        <div class="card">
+            <span>Gas Delta</span>
+            <h2 id="deltaValue">--</h2>
+            <small>Raw minus baseline</small>
+        </div>
+
+        <div class="card">
+            <span>Temperature</span>
+            <h2 id="temperatureValue">-- °C</h2>
+            <small>DHT11 sensor</small>
+        </div>
+
+        <div class="card">
+            <span>Humidity</span>
+            <h2 id="humidityValue">-- %</h2>
+            <small>DHT11 sensor</small>
+        </div>
+
+    </section>
+
+
+    <section class="dashboard-grid">
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <h3>AI Gas Exposure Probability</h3>
+            </div>
+
+            <div class="probability">
+
+                <div class="probability-value" id="gasProbability">
+                    0%
+                </div>
+
+                <div class="progress">
+                    <div
+                        id="probabilityBar"
+                        class="progress-fill">
+                    </div>
+                </div>
+
+                <p>
+                    Probability calculated by the trained Random Forest model.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <h3>Decision Engine</h3>
+            </div>
+
+            <div class="decision-row">
+
+                <div>
+                    <span>ESP32 Threshold</span>
+                    <strong id="esp32State">--</strong>
+                </div>
+
+                <div>
+                    <span>Machine Learning</span>
+                    <strong id="mlState">--</strong>
+                </div>
+
+            </div>
+
+            <div id="agreementBox" class="agreement">
+                Waiting for comparison
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="panel chart-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h3>Live Gas Sensor Trend</h3>
+                <p>MQ-2 raw reading compared with adaptive baseline</p>
+            </div>
+
+        </div>
+
+        <canvas id="gasChart"></canvas>
+
+    </section>
+
+
+    <section class="panel">
+
+        <div class="panel-header">
+            <h3>Latest Reading</h3>
+        </div>
+
+        <div class="reading-grid">
+
+            <div>
+                <span>ESP32 Time</span>
+                <strong id="timeValue">--</strong>
+            </div>
+
+            <div>
+                <span>Normal Probability</span>
+                <strong id="normalProbability">--</strong>
+            </div>
+
+            <div>
+                <span>Gas Probability</span>
+                <strong id="gasProbabilitySmall">--</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script src="/static/app.js"></script>
+
+</body>
+</html>
